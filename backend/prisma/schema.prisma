@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  password     String
+  role         Role      @default(USER)
+  googleId     String?
+  avatar       String?
+  createdAt    DateTime  @default(now())
+  websites     Website[]
+  schedules    Schedule[]
+  keywords     Keyword[]
+  subscription Subscription?
+  gaTokens     GaToken[]  
+}
+model GaToken {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Website {
+  id           String     @id @default(uuid())
+  userId       String
+  propertyId   String
+  propertyName String
+  websiteUrl   String
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id])
+  schedules    Schedule[]
+  keywords     Keyword[]
+}
+
+model Keyword {
+  id          String   @id @default(uuid())
+  userId      String
+  websiteId   String
+  keyword     String
+  currentRank Int?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  website     Website  @relation(fields: [websiteId], references: [id])
+}
+
+model Schedule {
+  id             String   @id @default(uuid())
+  userId         String
+  websiteId      String
+  recipientEmail String
+  reportDay      Int      @default(1)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id])
+  website        Website  @relation(fields: [websiteId], references: [id])
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  plan                 String   @default("free")
+  status               String   @default("active")
+  createdAt            DateTime @default(now())
+  user                 User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
