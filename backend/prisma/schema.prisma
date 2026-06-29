@@ -8,20 +8,21 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
+  id           String        @id @default(uuid())
   name         String
-  email        String    @unique
+  email        String        @unique
   password     String
-  role         Role      @default(USER)
+  role         Role          @default(USER)
   googleId     String?
   avatar       String?
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime      @default(now())
   websites     Website[]
   schedules    Schedule[]
   keywords     Keyword[]
   subscription Subscription?
-  gaTokens     GaToken[]  
+  gaTokens     GaToken[]
 }
+
 model GaToken {
   id           String   @id @default(uuid())
   userId       String   @unique
@@ -68,18 +69,131 @@ model Schedule {
 }
 
 model Subscription {
-  id                   String   @id @default(uuid())
-  userId               String   @unique
+  id                   String    @id @default(uuid())
+  userId               String    @unique
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  plan                 String   @default("free")
-  status               String   @default("active")
-  createdAt            DateTime @default(now())
-  user                 User     @relation(fields: [userId], references: [id])
+  plan                 String    @default("free")
+  status               String    @default("inactive")
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  user                 User      @relation(fields: [userId], references: [id])
 }
 
 enum Role {
   USER
   ADMIN
   SUPERADMIN
+}
+
+// Models for AI rankings and tags shown in the frontend report
+model Brand {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  rankings  Ranking[]
+}
+
+model Ranking {
+  id        String       @id @default(uuid())
+  brandId   String
+  category  String
+  country   String
+  period    DateTime // represents the month/date of the ranking (e.g. 2026-05-01)
+  score     Float
+  change    Float? // change vs previous period
+  sentiment String? // e.g. POSITIVE, MIXED, NEGATIVE
+  createdAt DateTime     @default(now())
+  brand     Brand        @relation(fields: [brandId], references: [id])
+  tags      RankingTag[]
+}
+
+model Tag {
+  id        String       @id @default(uuid())
+  name      String       @unique
+  createdAt DateTime     @default(now())
+  rankings  RankingTag[]
+}
+
+model RankingTag {
+  id        String  @id @default(uuid())
+  rankingId String
+  tagId     String
+  ranking   Ranking @relation(fields: [rankingId], references: [id])
+  tag       Tag     @relation(fields: [tagId], references: [id])
+
+  @@unique([rankingId, tagId])
+}
+
+// Cited Index models
+enum Platform {
+  CHATGPT
+  CLAUDE
+  GEMINI
+  PERPLEXITY
+}
+
+model Prompt {
+  id        String   @id @default(uuid())
+  text      String   @unique
+  category  String // e.g. "skincare", "travel", "audio"
+  country   String // e.g. "India", "US"
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  runs      Run[]
+}
+
+model Run {
+  id        String     @id @default(uuid())
+  promptId  String
+  period    DateTime // Month of the run (e.g. 2026-05-01)
+  status    String     @default("pending") // pending, running, completed, failed
+  createdAt DateTime   @default(now())
+  prompt    Prompt     @relation(fields: [promptId], references: [id])
+  responses Response[]
+}
+
+model Response {
+  id        String    @id @default(uuid())
+  runId     String
+  platform  Platform
+  text      String    @db.Text
+  status    String    @default("success") // success, error
+  createdAt DateTime  @default(now())
+  run       Run       @relation(fields: [runId], references: [id])
+  mentions  Mention[]
+
+  @@unique([runId, platform])
+}
+
+model Mention {
+  id         String   @id @default(uuid())
+  responseId String
+  brandId    String? // nullable if brand not in DB yet
+  brandName  String // the actual mentioned brand name
+  position   Int // 1-based position in response
+  sentiment  String? // POSITIVE, NEGATIVE, MIXED
+  tags       String[] // e.g. ["affordable", "premium"]
+  createdAt  DateTime @default(now())
+  response   Response @relation(fields: [responseId], references: [id])
+}
+
+model Citation {
+  id           String   @id @default(uuid())
+  brandId      String? // nullable if brand not in DB yet
+  brandName    String // brand name (for untracked brands)
+  category     String
+  country      String
+  period       DateTime // Month of the citation (e.g. 2026-05-01)
+  mentionCount Int      @default(0)
+  score        Float // aggregated score 0-100
+  change       Float? // change vs previous period
+  avgPosition  Float? // average position across all mentions
+  sentiment    String? // POSITIVE, NEGATIVE, MIXED (majority)
+  createdAt    DateTime @default(now())
+
+  @@unique([brandName, category, country, period])
 }

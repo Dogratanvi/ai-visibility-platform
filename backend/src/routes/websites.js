@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const authMiddleware = require('../middleware/auth');
+const paidMiddleware = require('../middleware/paid');
 const prisma = new PrismaClient();
 
+router.use(authMiddleware, paidMiddleware);
+
 // Get all websites of user
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const websites = await prisma.website.findMany({
       where: { userId: req.user.id },
@@ -18,10 +21,25 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // Add website
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { url, propertyName } = req.body;
     if (!url) return res.status(400).json({ error: 'URL required' });
+
+    const maxWebsites = req.subscriptionEntitlements?.maxWebsites;
+    if (typeof maxWebsites === 'number') {
+      const currentWebsiteCount = await prisma.website.count({
+        where: { userId: req.user.id },
+      });
+
+      if (currentWebsiteCount >= maxWebsites) {
+        return res.status(403).json({
+          error: `Your current plan allows ${maxWebsites} website${maxWebsites === 1 ? '' : 's'}. Upgrade to add more websites.`,
+          code: 'WEBSITE_LIMIT_REACHED',
+          limit: maxWebsites,
+        });
+      }
+    }
 
     const website = await prisma.website.create({
       data: {
@@ -38,7 +56,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // Delete website
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const website = await prisma.website.findUnique({ where: { id: req.params.id } });
     if (!website || website.userId !== req.user.id) {

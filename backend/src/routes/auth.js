@@ -27,9 +27,9 @@ router.post('/register', async (req, res) => {
       data: { name, email, password: hashedPassword }
     });
 
-    // Create free subscription
+    // Create an inactive free entitlement until checkout succeeds.
     await prisma.subscription.create({
-      data: { userId: user.id, plan: 'free', status: 'active' }
+      data: { userId: user.id, plan: 'free', status: 'inactive' }
     });
 
     const token = generateToken(user);
@@ -70,7 +70,7 @@ router.post('/google', async (req, res) => {
         data: { email, name, googleId, avatar, password: '' }
       });
       await prisma.subscription.create({
-        data: { userId: user.id, plan: 'free', status: 'active' }
+        data: { userId: user.id, plan: 'free', status: 'inactive' }
       });
     }
 

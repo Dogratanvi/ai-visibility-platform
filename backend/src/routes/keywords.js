@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 const { PrismaClient } = require('@prisma/client');
 const authMiddleware = require('../middleware/auth');
+const paidMiddleware = require('../middleware/paid');
 const prisma = new PrismaClient();
 
+router.use(authMiddleware, paidMiddleware);
+
 // Get all keywords for a website
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { siteId } = req.params;
     if (!siteId) return res.status(400).json({ error: 'siteId is required' });
@@ -27,7 +30,7 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // Add a keyword to a website
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { siteId } = req.params;
     const { keyword } = req.body;

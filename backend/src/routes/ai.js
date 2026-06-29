@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/auth');
+const paidMiddleware = require('../middleware/paid');
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+router.use(authMiddleware, paidMiddleware);
 
 const createMockResults = (website, selectedTools) => {
   const baseKeywords = [
@@ -35,6 +39,18 @@ const createMockResults = (website, selectedTools) => {
       description: `Claude-style keyword recommendations for ${website}.`,
       googleRank: currentRank + 2,
       rawOutput: `Claude predicted rank ${currentRank + 2} for ${website}.`,
+    });
+  }
+
+  if (selectedTools.includes('chatbot')) {
+    results.push({
+      tool: 'Chatbot',
+      source: 'Custom AI',
+      website,
+      keywords: baseKeywords.slice(0, 2),
+      description: `Chatbot keyword recommendations and search intent insights for ${website}.`,
+      googleRank: Math.max(1, currentRank - 1),
+      rawOutput: `Chatbot predicted rank ${Math.max(1, currentRank - 1)} for ${website}.`,
     });
   }
 
@@ -119,6 +135,36 @@ Return ONLY valid JSON.`;
   return JSON.parse(jsonMatch[0]);
 };
 
+const fetchChatbotInsights = async (website) => {
+  const prompt = `You are a chatbot-style SEO analyst. For the website ${website}, provide a small JSON array of keyword items. Each item should include:\n  - tool: Chatbot\n  - source: Custom AI\n  - keywords: an array of 3 to 5 keyword phrases\n  - description: a short description of the keyword set or opportunity\n  - googleRank: a predicted rank number from 1 to 20\n\nReturn ONLY valid JSON.`;
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are a helpful chatbot SEO assistant.' },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.8,
+      max_tokens: 400,
+    }),
+  });
+
+  const data = await response.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error('OpenAI returned no content for chatbot insights');
+
+  const jsonMatch = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  if (!jsonMatch) throw new Error('Unable to parse OpenAI response for chatbot insights');
+
+  return JSON.parse(jsonMatch[0]);
+};
+
 const getAiResults = async (website, selectedTools) => {
   const results = [];
 
@@ -126,6 +172,13 @@ const getAiResults = async (website, selectedTools) => {
     const openAiResults = await fetchOpenAIInsights(website);
     if (Array.isArray(openAiResults)) {
       results.push(...formatAiResults(openAiResults, website));
+    }
+  }
+
+  if (OPENAI_API_KEY && selectedTools.includes('chatbot')) {
+    const chatbotResults = await fetchChatbotInsights(website);
+    if (Array.isArray(chatbotResults)) {
+      results.push(...formatAiResults(chatbotResults, website));
     }
   }
 
