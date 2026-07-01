@@ -37,6 +37,7 @@ const PLANS = [
       {
         title: null,
         features: [
+          { label: '1 brand / website tracked' },
           { label: '3 AI platforms', detail: 'ChatGPT, Perplexity, Gemini' },
           { label: '25 tracked prompts' },
           { label: '3 competitors tracked' },
@@ -62,8 +63,8 @@ const PLANS = [
     highlighted: true,
     badge: 'Most popular',
     entitlements: {
-      maxWebsites: 1,
-      brandsPerAccount: 1,
+      maxWebsites: 3,
+      brandsPerAccount: 3,
       aiPlatforms: 5,
       platformNames: ['ChatGPT', 'Perplexity', 'Gemini', 'Google AIO', 'AI Mode'],
       trackedPrompts: 75,
@@ -95,6 +96,7 @@ const PLANS = [
       {
         title: 'Everything in Starter, plus:',
         features: [
+          { label: '3 brands / websites tracked' },
           { label: 'Full AI narrative intelligence' },
           { label: 'Perception gap analysis' },
           { label: 'Prioritized recommendations' },
@@ -118,8 +120,8 @@ const PLANS = [
     highlighted: false,
     badge: null,
     entitlements: {
-      maxWebsites: 2,
-      brandsPerAccount: 2,
+      maxWebsites: 10,
+      brandsPerAccount: 10,
       aiPlatforms: 7,
       platformNames: ['ChatGPT', 'Perplexity', 'Gemini', 'Google AIO', 'AI Mode', 'Claude', 'Grok'],
       trackedPrompts: 125,
@@ -151,7 +153,7 @@ const PLANS = [
       {
         title: 'Everything in Pro, plus:',
         features: [
-          { label: '2 brands per account' },
+          { label: '10 brands / websites tracked' },
           { label: 'Source map (Sankey)' },
           { label: 'Slack alerts' },
           { label: 'Shopify integration' },

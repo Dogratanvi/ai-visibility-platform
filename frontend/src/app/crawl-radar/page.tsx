@@ -90,31 +90,32 @@ export default function CrawlRadarPage() {
   const blockedCount = crawlerStates.filter((crawler) => crawler.status === 'blocked').length;
 
   return (
-    <div className="min-h-screen bg-surface text-white">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans">
       <PublicHeader />
       <main className="mx-auto max-w-6xl px-6 py-12 lg:py-16">
         {!started ? (
           <>
             <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
               <div className="space-y-6">
-                <span className="inline-flex items-center gap-2 rounded-full bg-surface-soft px-4 py-2 text-xs uppercase tracking-[0.32em] text-brand">Free Tool</span>
-                <h1 className="text-5xl font-semibold">Crawl Radar</h1>
-                <p className="max-w-2xl text-lg leading-8 text-white/70">
+                <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-150 px-4 py-2 text-xs uppercase tracking-[0.24em] font-bold text-indigo-600">Free Tool</span>
+                <h1 className="text-5xl font-extrabold text-slate-900 leading-tight">Crawl Radar</h1>
+                <p className="max-w-2xl text-lg leading-8 text-slate-600">
                   Test whether real AI crawler user-agents can access your website. Crawl Radar checks robots.txt rules and makes actual crawler-style requests.
                 </p>
               </div>
 
-              <div className="rounded-4xl border border-surface bg-surface-strong/90 p-10 shadow-xl shadow-[#1b243d]/30">
-                <p className="text-sm uppercase tracking-[0.32em] text-[#4dd8d0]">Crawler Access</p>
-                <h2 className="mt-4 text-3xl font-semibold text-white">See which AI bots can actually read your site.</h2>
-                <p className="mt-4 text-white/60">Results may take a little time because each bot is tested separately.</p>
+              <div className="rounded-4xl border border-slate-200 bg-white p-10 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-full" />
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-indigo-600">Crawler Access</p>
+                <h2 className="mt-4 text-3xl font-extrabold text-slate-900 leading-snug">See which AI bots can actually read your site.</h2>
+                <p className="mt-4 text-slate-500">Results may take a little time because each bot is tested separately.</p>
               </div>
             </section>
 
-            <section className="mt-12 rounded-[10px] border border-surface bg-surface-strong/70 p-8">
+            <section className="mt-12 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
               <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
                 <div>
-                  <label className="block text-sm font-medium text-white/70">Website URL</label>
+                  <label className="block text-sm font-bold text-slate-600">Website URL</label>
                   <input
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
@@ -122,45 +123,45 @@ export default function CrawlRadarPage() {
                       if (e.key === 'Enter') handleSubmit();
                     }}
                     placeholder="https://example.com"
-                    className="mt-3 w-full rounded-lg border border-surface bg-[#070b16] px-4 py-3 text-white outline-none placeholder:text-white/35 focus:border-[#4dd8d0]"
+                    className="mt-3 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none placeholder:text-slate-450 focus:border-indigo-500 focus:bg-white animate-transition"
                   />
                 </div>
-                <button onClick={handleSubmit} disabled={loading} className="rounded-lg btn-brand px-6 py-3 text-sm font-semibold transition disabled:opacity-70">
+                <button onClick={handleSubmit} disabled={loading} className="rounded-full btn-brand px-8 py-3 text-sm font-bold shadow-md transition disabled:opacity-70 cursor-pointer">
                   Start Crawl
                 </button>
               </div>
-              {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
+              {error ? <p className="mt-4 text-sm text-red-500 font-semibold">{error}</p> : null}
             </section>
           </>
         ) : (
           <section className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4dd8d0]">Crawl Radar</p>
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-indigo-600">Crawl Radar</p>
 
-            <div className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#123746]">
-              <div className={`h-12 w-12 rounded-full border border-[#4dd8d0] ${loading ? 'animate-pulse' : ''}`} />
+            <div className="mx-auto mt-6 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-50 border border-indigo-150">
+              <div className={`h-12 w-12 rounded-full border-2 border-indigo-500 ${loading ? 'animate-ping' : ''}`} />
             </div>
 
-            <p className="mt-10 text-lg text-white/70">
+            <p className="mt-10 text-lg font-bold text-slate-700">
               {loading ? `Testing ${currentCrawler}...` : `Crawl complete: ${accessibleCount} accessible, ${blockedCount} blocked`}
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {crawlerStates.map((crawler) => {
                 const isAccessible = crawler.status === 'accessible';
                 const isBlocked = crawler.status === 'blocked';
                 const isTesting = crawler.status === 'testing';
-                const dotClass = isAccessible ? 'bg-green-400' : isBlocked ? 'bg-red-400' : isTesting ? 'bg-[#4dd8d0]' : 'bg-slate-700';
-                const borderClass = isAccessible ? 'border-green-400/35' : isBlocked ? 'border-red-400/35' : isTesting ? 'border-[#4dd8d0]/50' : 'border-surface';
+                const dotClass = isAccessible ? 'bg-emerald-500 animate-pulse' : isBlocked ? 'bg-rose-500' : isTesting ? 'bg-indigo-500 animate-spin' : 'bg-slate-400';
+                const borderClass = isAccessible ? 'border-emerald-200 bg-emerald-50/20' : isBlocked ? 'border-rose-200 bg-rose-50/20' : isTesting ? 'border-indigo-300 bg-indigo-50/10' : 'border-slate-200 bg-white';
                 const label = isAccessible ? 'Accessible' : isBlocked ? crawler.reason || 'Blocked' : isTesting ? 'Testing...' : 'Pending...';
 
                 return (
-                  <div key={crawler.name} className={`min-h-20 rounded-[7px] border ${borderClass} bg-surface-strong/70 p-3 text-left`}>
-                    <div className="flex items-start gap-2">
-                      <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} />
+                  <div key={crawler.name} className={`min-h-20 rounded-2xl border ${borderClass} p-4 text-left shadow-xs transition hover:shadow-md`}>
+                    <div className="flex items-start gap-3">
+                      <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} />
                       <div>
-                        <p className="text-sm font-bold leading-4 text-white">{crawler.name}</p>
-                        <p className="mt-3 text-xs text-white/35">{label}</p>
-                        {crawler.latencyMs ? <p className="mt-1 text-[10px] text-white/25">{crawler.latencyMs}ms</p> : null}
+                        <p className="text-sm font-bold leading-5 text-slate-900">{crawler.name}</p>
+                        <p className="mt-2 text-xs font-semibold text-slate-500">{label}</p>
+                        {crawler.latencyMs ? <p className="mt-1 text-[10px] font-bold text-slate-400">{crawler.latencyMs}ms</p> : null}
                       </div>
                     </div>
                   </div>
@@ -169,8 +170,8 @@ export default function CrawlRadarPage() {
             </div>
 
             {!loading ? (
-              <div className="mt-8 flex justify-center gap-3">
-                <button onClick={handleSubmit} className="rounded-lg bg-[#123746] px-5 py-3 text-sm font-bold text-[#4dd8d0] hover:bg-[#17495c]">
+              <div className="mt-10 flex justify-center gap-4">
+                <button onClick={handleSubmit} className="rounded-full btn-brand px-6 py-3 text-sm font-bold shadow-md transition cursor-pointer">
                   Run Again
                 </button>
                 <button
@@ -178,7 +179,7 @@ export default function CrawlRadarPage() {
                     setStarted(false);
                     setCrawlerStates(crawlers);
                   }}
-                  className="rounded-lg border border-surface bg-white/5 px-5 py-3 text-sm font-bold text-white hover:bg-white/10"
+                  className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer"
                 >
                   Test Another Website
                 </button>

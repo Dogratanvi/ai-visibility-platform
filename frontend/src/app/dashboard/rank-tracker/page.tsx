@@ -3,7 +3,7 @@ import RankTrackerClient from './RankTrackerClient';
 
 export default function RankTrackerPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0f1117] text-white p-6">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-transparent text-slate-400 p-6 font-semibold text-sm">Loading...</div>}>
       <RankTrackerClient />
     </Suspense>
   );

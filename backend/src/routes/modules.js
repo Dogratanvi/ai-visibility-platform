@@ -165,8 +165,17 @@ async function testCrawlerAccess(website, bot) {
 
   const page = await fetchAs(target.fullUrl, bot.name);
   const textLength = stripHtml(page.body).length;
+
+  const titleMatch = page.body.match(/<title>([\s\S]*?)<\/title>/i);
+  const title = titleMatch ? titleMatch[1].toLowerCase() : '';
+  const isBlockTitle = title.includes('access denied')
+    || title.includes('attention required')
+    || title.includes('security check')
+    || title.includes('captcha')
+    || title.includes('just a moment');
+
   const blockedByResponse = page.statusCode >= 400
-    || /access denied|forbidden|captcha|cloudflare|bot detection|blocked|verify you are human/i.test(page.body)
+    || isBlockTitle
     || textLength < 80;
 
   return {

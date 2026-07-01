@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import React, { useCallback, useEffect, useState } from 'react';
 
 type Ranking = {
@@ -24,6 +25,7 @@ export default function RankingsPanel() {
   const [total, setTotal] = useState(0);
 
   const fetchData = useCallback(() => {
+    setLoading(true);
     const skip = (page - 1) * pageSize;
     const url = new URL('http://localhost:5000/api/rankings');
     url.searchParams.set('country', country);
@@ -47,70 +49,126 @@ export default function RankingsPanel() {
   }, [fetchData]);
 
   return (
-    <div className="space-y-5">
-      <div className="mt-5 space-y-3">
+    <div className="space-y-6">
+      <div className="space-y-3">
         {loading && (
           <div className="space-y-3">
             {[1, 2, 3].map((item) => (
-              <div key={item} className="h-[72px] animate-pulse rounded-2xl bg-white/[0.05]" />
+              <div key={item} className="h-16 animate-pulse rounded-2xl bg-slate-100 border border-slate-200/50" />
             ))}
           </div>
         )}
         {!loading && items.length === 0 && (
-          <div className="rounded-3xl border border-dashed border-white/12 bg-white/[0.035] p-5">
-            <p className="text-sm font-semibold text-white">No rankings available yet</p>
-            <p className="mt-2 max-w-md text-sm leading-6 text-white/55">The live leaderboard will appear here as soon as matching ranking data is available.</p>
+          <div className="rounded-3xl border border-dashed border-slate-250 bg-slate-50/50 p-6 text-center">
+            <p className="text-sm font-bold text-slate-800">No rankings available yet</p>
+            <p className="mt-1 max-w-md mx-auto text-xs text-slate-450 leading-relaxed font-semibold">
+              The live leaderboard will appear here as soon as matching ranking data is available.
+            </p>
           </div>
         )}
 
-        {items.map((r, index) => (
-          <div key={r.id} className="grid gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/80 sm:grid-cols-[1.5fr_0.7fr_0.9fr_1fr]">
+        {!loading && items.map((r, index) => (
+          <div key={r.id} className="grid gap-3 rounded-2xl border border-slate-150 bg-white p-4 text-xs font-semibold text-slate-600 sm:grid-cols-[1.5fr_0.8fr_0.8fr_1fr] items-center transition hover:border-slate-300 hover:shadow-xs">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#64f4d2]/12 text-sm font-semibold text-[#64f4d2]">{index + 1}</div>
-              <span className="truncate font-semibold text-white">{r.brand.name}</span>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 border border-indigo-150 text-xs font-extrabold text-indigo-650">
+                {(page - 1) * pageSize + index + 1}
+              </div>
+              <span className="truncate font-extrabold text-slate-900 text-sm">{r.brand.name}</span>
             </div>
-            <span className="text-white/70">Score {Math.round(r.score)}</span>
-            <span className="text-white">{r.sentiment ? r.sentiment : '-'}</span>
-            <span className="truncate text-white/65">{r.tags.slice(0, 2).join(', ')}</span>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">Score</span>
+              <span className="text-slate-800 font-extrabold text-sm">{Math.round(r.score)}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">Sentiment</span>
+              <span className={`inline-block font-bold text-[10px] px-2 py-0.5 rounded-full ${
+                r.sentiment === 'POSITIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                r.sentiment === 'MIXED' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                'bg-slate-50 text-slate-500 border border-slate-200'
+              }`}>
+                {r.sentiment || 'NEUTRAL'}
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">Key Tags</span>
+              <div className="flex flex-wrap gap-1">
+                {r.tags.slice(0, 2).map((tag) => (
+                  <span key={tag} className="text-[10px] bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-slate-500 font-semibold">
+                    {tag}
+                  </span>
+                ))}
+                {r.tags.length === 0 && <span className="text-slate-400 font-bold">-</span>}
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="grid gap-3 text-sm text-white/70 xl:grid-cols-[1fr_auto]">
+      <div className="grid gap-4 text-xs font-semibold text-slate-600 xl:grid-cols-[1fr_auto] border-t border-slate-150 pt-5">
         <div className="grid gap-3 sm:grid-cols-3">
-          <label className="space-y-1 text-xs text-white/45">
-            <span>Country</span>
-            <select value={country} onChange={(e) => { setPage(1); setCountry(e.target.value); }} className="h-10 w-full rounded-xl border border-white/10 bg-[#07101e] px-3 text-sm text-white outline-none transition focus:border-[#64f4d2]/50">
+          <label className="space-y-1 text-slate-450 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider block">Country</span>
+            <select
+              value={country}
+              onChange={(e) => { setPage(1); setCountry(e.target.value); }}
+              className="h-10 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-800 outline-none transition focus:bg-white focus:border-indigo-500 font-semibold"
+            >
               <option value="India">India</option>
               <option value="US">US</option>
             </select>
           </label>
 
-          <label className="space-y-1 text-xs text-white/45">
-            <span>Category</span>
-            <select value={category} onChange={(e) => { setPage(1); setCategory(e.target.value); }} className="h-10 w-full rounded-xl border border-white/10 bg-[#07101e] px-3 text-sm text-white outline-none transition focus:border-[#64f4d2]/50">
+          <label className="space-y-1 text-slate-450 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider block">Category</span>
+            <select
+              value={category}
+              onChange={(e) => { setPage(1); setCategory(e.target.value); }}
+              className="h-10 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-800 outline-none transition focus:bg-white focus:border-indigo-500 font-semibold"
+            >
               <option value="skincare">Skincare</option>
               <option value="travel">Travel</option>
             </select>
           </label>
 
-          <label className="space-y-1 text-xs text-white/45">
-            <span>Period</span>
-            <input value={period} onChange={(e) => { setPage(1); setPeriod(e.target.value); }} className="h-10 w-full rounded-xl border border-white/10 bg-[#07101e] px-3 text-sm text-white outline-none transition focus:border-[#64f4d2]/50" />
+          <label className="space-y-1 text-slate-450 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider block">Period</span>
+            <input
+              value={period}
+              onChange={(e) => { setPage(1); setPeriod(e.target.value); }}
+              className="h-10 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-800 outline-none transition focus:bg-white focus:border-indigo-500 font-semibold"
+            />
           </label>
         </div>
 
         <div className="flex flex-wrap items-end gap-2 xl:justify-end">
-          <label className="space-y-1 text-xs text-white/45">
-            <span>Rows</span>
-            <select value={pageSize} onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }} className="h-10 rounded-xl border border-white/10 bg-[#07101e] px-3 text-sm text-white outline-none transition focus:border-[#64f4d2]/50">
+          <label className="space-y-1 text-slate-450 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider block">Rows</span>
+            <select
+              value={pageSize}
+              onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
+              className="h-10 rounded-2xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-800 outline-none transition focus:bg-white focus:border-indigo-500 font-semibold"
+            >
               <option value={5}>5</option>
               <option value={10}>10</option>
             </select>
           </label>
-          <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40">Prev</button>
-          <div className="flex h-10 items-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-white/70">Page {page} / {Math.max(1, Math.ceil(total / pageSize))}</div>
-          <button disabled={(page * pageSize) >= total} onClick={() => setPage(p => p + 1)} className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="h-10 rounded-2xl border border-slate-200 bg-white px-4 text-slate-700 hover:bg-slate-50 transition font-bold disabled:opacity-40 disabled:hover:bg-white cursor-pointer"
+          >
+            Prev
+          </button>
+          <div className="flex h-10 items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 text-slate-500 font-bold">
+            Page {page} / {Math.max(1, Math.ceil(total / pageSize))}
+          </div>
+          <button
+            disabled={(page * pageSize) >= total}
+            onClick={() => setPage((p) => p + 1)}
+            className="h-10 rounded-2xl border border-slate-200 bg-white px-4 text-slate-700 hover:bg-slate-50 transition font-bold disabled:opacity-40 disabled:hover:bg-white cursor-pointer"
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

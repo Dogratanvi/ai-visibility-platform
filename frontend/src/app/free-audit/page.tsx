@@ -1,300 +1,208 @@
 'use client';
+
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import PublicHeader from '@/components/PublicHeader';
 import PublicFooter from '@/components/PublicFooter';
 
-type AuditResult = {
-  url: string;
-  fullUrl: string;
-  score: number;
-  pillars: {
-    accessibility: { score: number; total: number };
-    readability: { score: number; total: number };
-    understandability: { score: number; total: number };
-  };
-  crawlers: Array<{ name: string; source: string; blocked: boolean }>;
-  allowedCount: number;
-  blockedCount: number;
-  flags: Array<{ type: string; impact: string; title: string }>;
-};
-
 export default function FreeAudit() {
+  const router = useRouter();
   const [url, setUrl] = useState('');
-  const [result, setResult] = useState<AuditResult | null>(null);
+  const [email, setEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [step, setStep] = useState<'input' | 'email_input' | 'code_input' | 'auth_prompt'>('input');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
 
-  const handleRunAudit = async () => {
+  const handleStartAudit = () => {
     if (!url.trim()) {
       setError('Please enter a website URL');
       return;
     }
-
-    setLoading(true);
     setError('');
-    setResult(null);
+    setStep('email_input');
+  };
 
-    try {
-      const response = await fetch('http://localhost:5000/api/free-audit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to run audit');
-      }
-
-      const data = await response.json();
-      setResult(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error running audit');
-    } finally {
-      setLoading(false);
+  const handleSendCode = () => {
+    if (!email.trim() || !email.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
     }
+    setError('');
+    setLoading(true);
+    // Simulate sending 6-digit code
+    setTimeout(() => {
+      setLoading(false);
+      setCodeSent(true);
+      setStep('code_input');
+    }, 1200);
+  };
+
+  const handleVerifyCode = () => {
+    if (verificationCode.length < 4) {
+      setError('Please enter a valid verification code');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setStep('auth_prompt');
+    }, 1000);
+  };
+
+  const handleRedirectRegister = () => {
+    router.push(`/register?email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleRunAudit();
+      if (step === 'input') handleStartAudit();
+      else if (step === 'email_input') handleSendCode();
+      else if (step === 'code_input') handleVerifyCode();
     }
   };
 
-  const getImpactColor = (impact: string) => {
-    if (impact === 'High') return 'text-red-400';
-    if (impact === 'Medium') return 'text-yellow-400';
-    return 'text-green-400';
-  };
-
-  const getImpactBg = (impact: string) => {
-    if (impact === 'High') return 'bg-red-500/10 border-red-500/20';
-    if (impact === 'Medium') return 'bg-yellow-500/10 border-yellow-500/20';
-    return 'bg-green-500/10 border-green-500/20';
-  };
-
   return (
-    <div className="min-h-screen bg-surface text-white">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans">
       <PublicHeader />
 
-      <main className="mx-auto max-w-7xl px-6 py-10 lg:py-16">
-        {!result ? (
-          <section className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div className="space-y-6">
-              <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-surface-soft px-4 py-2 text-xs uppercase tracking-[0.32em] text-brand">Free Audit</span>
-                <h1 className="mt-4 text-5xl font-semibold leading-tight">See your AI Visibility Score</h1>
-              </div>
-              <p className="max-w-2xl text-lg leading-8 text-white/70">
-                Get a comprehensive analysis of how accessible, readable, and crawlable your website is for AI platforms. See which crawlers can reach you and what needs fixing.
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  onClick={handleRunAudit}
-                  disabled={loading}
-                  className="inline-flex items-center justify-center rounded-full btn-brand px-6 py-3 text-sm font-semibold transition disabled:opacity-70"
-                >
-                  {loading ? 'Analyzing...' : 'Run Free Audit →'}
-                </button>
-                <a
-                  href="/geo-score"
-                  className="inline-flex items-center justify-center rounded-full border border-surface bg-white/5 px-6 py-3 text-sm text-white transition hover:bg-white/10"
-                >
-                  GEO Score Tool →
-                </a>
-              </div>
+      <main className="mx-auto max-w-7xl px-6 py-12 lg:py-20">
+        <section className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div className="space-y-6">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-150 px-4 py-2 text-xs uppercase tracking-[0.24em] font-bold text-indigo-650">
+                AI visibility Report
+              </span>
+              <h1 className="mt-4 text-5xl font-extrabold text-slate-900 leading-tight">
+                Unlock Your Brand's Placement Audit
+              </h1>
             </div>
+            <p className="max-w-2xl text-base leading-relaxed text-slate-650 font-semibold">
+              Scan, verify, and monitor citation metrics across ChatGPT, Google Gemini, Perplexity, and Claude. To access this premium report, verify your email and subscribe to a platform plan.
+            </p>
+            <div className="flex gap-4">
+              <a
+                href="/pricing"
+                className="inline-flex items-center justify-center rounded-full btn-brand px-6 py-3 text-xs font-bold shadow-md transition hover:shadow-lg"
+              >
+                View Plans & Pricing →
+              </a>
+            </div>
+          </div>
 
-            <div className="rounded-4xl border border-surface bg-surface-strong/90 p-10 shadow-xl">
+          {/* Funnel Card Container */}
+          <div className="rounded-4xl border border-slate-200 bg-white p-8 md:p-10 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-full" />
+            
+            {step === 'input' && (
               <div className="space-y-4">
-                <label className="block text-sm font-semibold text-white">Website URL</label>
-                <input
-                  type="text"
-                  placeholder="https://www.example.com"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="w-full rounded-3xl border border-surface bg-surface px-6 py-3 text-white placeholder-white/40 focus:border-brand focus:outline-none"
-                />
-                {error && (
-                  <div className="text-sm text-red-400">{error}</div>
-                )}
-              </div>
-            </div>
-          </section>
-        ) : (
-          <section className="space-y-8">
-            {/* Score Card */}
-            <div className="rounded-4xl border border-surface bg-surface-strong/90 p-10 flex flex-col items-center gap-6">
-              {/* Score Circle */}
-              <div className="relative h-48 w-48">
-                <svg className="h-full w-full" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="#0ea5e9"
-                    strokeWidth="3"
-                    strokeDasharray={`${(result.score / 100) * 282.7} 282.7`}
-                    strokeLinecap="round"
-                    transform="rotate(-90 50 50)"
+                <h3 className="text-lg font-extrabold text-slate-900">Run Website Audit</h3>
+                <p className="text-xs text-slate-500 font-semibold">Enter your domain URL to initiate the scanning system.</p>
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">Website URL</label>
+                  <input
+                    type="text"
+                    placeholder="https://www.yourdomain.com"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition text-xs font-semibold"
                   />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-5xl font-bold text-white">{result.score}</div>
-                  <div className="text-xs text-white/60">/ 100</div>
-                </div>
-              </div>
-
-              {/* URL */}
-              <div className="text-center">
-                <h2 className="text-2xl font-semibold text-white">{result.url}</h2>
-                <p className="text-xs text-white/60 mt-2">{result.fullUrl}</p>
-              </div>
-
-              {/* Pillar Breakdowns */}
-              <div className="w-full mt-8 space-y-4">
-                <h3 className="text-sm uppercase tracking-[0.32em] text-brand">Pillar Breakdowns</h3>
-                
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-white/80">Accessibility</span>
-                    <span className="text-sm font-semibold text-white">{result.pillars.accessibility.score}/{result.pillars.accessibility.total}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-surface/50 overflow-hidden">
-                    <div
-                      className="h-full bg-cyan-500 transition-all"
-                      style={{ width: `${(result.pillars.accessibility.score / result.pillars.accessibility.total) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-white/80">Readability</span>
-                    <span className="text-sm font-semibold text-white">{result.pillars.readability.score}/{result.pillars.readability.total}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-surface/50 overflow-hidden">
-                    <div
-                      className="h-full bg-cyan-500 transition-all"
-                      style={{ width: `${(result.pillars.readability.score / result.pillars.readability.total) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-white/80">Understandability</span>
-                    <span className="text-sm font-semibold text-white">{result.pillars.understandability.score}/{result.pillars.understandability.total}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-surface/50 overflow-hidden">
-                    <div
-                      className="h-full bg-orange-500 transition-all"
-                      style={{ width: `${(result.pillars.understandability.score / result.pillars.understandability.total) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* AI Crawler Access Report */}
-            <div className="rounded-4xl border border-surface bg-surface-strong/90 p-10">
-              <h3 className="text-sm uppercase tracking-[0.32em] text-brand mb-6">AI Crawler Access Report</h3>
-              <p className="text-sm text-white/70 mb-4">Can AI bots actually read your page?</p>
-
-              <div className="mb-6 flex items-center gap-2">
-                <span className="text-2xl font-bold text-brand">{result.allowedCount}</span>
-                <span className="text-white/60">of {result.crawlers.length} crawlers have full access</span>
-              </div>
-
-              <div className="space-y-3">
-                <div className="text-sm text-brand uppercase tracking-[0.32em]">AI LLM Crawlers ({result.crawlers.length} results)</div>
-                {result.crawlers.map((crawler) => (
-                  <div key={crawler.name} className="flex items-center justify-between rounded-2xl bg-surface p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${crawler.blocked ? 'bg-red-500' : 'bg-green-500'}`} />
-                      <div>
-                        <p className="text-sm text-white font-medium">{crawler.name}</p>
-                        <p className="text-xs text-white/60">{crawler.source}</p>
-                      </div>
-                    </div>
-                    <span className={`text-xs font-semibold ${crawler.blocked ? 'text-red-400' : 'text-green-400'}`}>
-                      {crawler.blocked ? 'Blocked' : 'Allowed'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Top Flags */}
-            {result.flags.length > 0 && (
-              <div className="rounded-4xl border border-surface bg-surface-strong/90 p-10">
-                <h3 className="text-sm uppercase tracking-[0.32em] text-brand mb-6">Top Flags</h3>
-                <div className="space-y-4">
-                  {result.flags.map((flag, i) => (
-                    <div key={i} className={`border rounded-2xl p-4 ${getImpactBg(flag.impact)}`}>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className={`text-xs font-semibold uppercase ${getImpactColor(flag.impact)}`}>
-                            {flag.type} - {flag.impact} Impact
-                          </p>
-                          <p className="mt-2 text-sm text-white">{flag.title}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  {error && <p className="text-xs text-red-500 font-bold">{error}</p>}
+                  <button
+                    onClick={handleStartAudit}
+                    className="w-full rounded-2xl btn-brand py-3 text-xs font-bold text-white hover:shadow-xs transition cursor-pointer"
+                  >
+                    Check AI Visibility →
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Link copied!');
-                }}
-                className="rounded-full border border-surface bg-white/5 px-6 py-3 text-sm text-white transition hover:bg-white/10"
-              >
-                🔗 Copy Link
-              </button>
-              <button
-                onClick={() => {
-                  window.print();
-                }}
-                className="rounded-full border border-surface bg-white/5 px-6 py-3 text-sm text-white transition hover:bg-white/10"
-              >
-                ⬇ Download Report
-              </button>
-            </div>
+            {step === 'email_input' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-extrabold text-slate-900">📧 Step 1: Email Verification</h3>
+                <p className="text-xs text-slate-500 font-semibold">To prevent bot requests, verify your email before generating your report.</p>
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="you@domain.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition text-xs font-semibold"
+                  />
+                  {error && <p className="text-xs text-red-500 font-bold">{error}</p>}
+                  <button
+                    onClick={handleSendCode}
+                    disabled={loading}
+                    className="w-full rounded-2xl btn-brand py-3 text-xs font-bold text-white hover:shadow-xs transition cursor-pointer disabled:opacity-50"
+                  >
+                    {loading ? 'Sending Pin...' : 'Send Verification Code'}
+                  </button>
+                </div>
+              </div>
+            )}
 
-            {/* CTA */}
-            <div className="text-center space-y-4">
-              <h3 className="text-2xl font-semibold text-white">See your full breakdown</h3>
-              <p className="text-white/70">Get detailed insights on every aspect of your AI visibility.</p>
-              <a
-                href="/dashboard"
-                className="inline-flex items-center justify-center rounded-full btn-brand px-8 py-3 text-sm font-semibold"
-              >
-                Unlock Full Report →
-              </a>
-            </div>
+            {step === 'code_input' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-extrabold text-slate-900">🔑 Enter Verification Code</h3>
+                <p className="text-xs text-slate-500 font-semibold">We sent a 6-digit confirmation pin to <strong>{email}</strong>.</p>
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">Verification Pin</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="123456"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-slate-800 text-center tracking-widest outline-none focus:border-indigo-500 focus:bg-white transition text-xs font-bold"
+                  />
+                  {error && <p className="text-xs text-red-500 font-bold">{error}</p>}
+                  <button
+                    onClick={handleVerifyCode}
+                    disabled={loading}
+                    className="w-full rounded-2xl btn-brand py-3 text-xs font-bold text-white hover:shadow-xs transition cursor-pointer disabled:opacity-50"
+                  >
+                    {loading ? 'Verifying Code...' : 'Verify Pin & Continue'}
+                  </button>
+                </div>
+              </div>
+            )}
 
-            {/* Run New Audit */}
-            <div className="text-center">
-              <button
-                onClick={() => {
-                  setResult(null);
-                  setUrl('');
-                }}
-                className="inline-flex items-center justify-center rounded-full border border-surface bg-white/5 px-6 py-3 text-sm text-white transition hover:bg-white/10"
-              >
-                ← Run Another Audit
-              </button>
-            </div>
-          </section>
-        )}
+            {step === 'auth_prompt' && (
+              <div className="space-y-5 text-center">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto text-xl">
+                  ✓
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-extrabold text-slate-900">Email Verified Successfully</h3>
+                  <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                    Your assessment for <strong>{url}</strong> is ready. Register or log in below, choose a tracking plan, and unlock your dashboard.
+                  </p>
+                </div>
+                <div className="space-y-2.5 pt-3">
+                  <button
+                    onClick={handleRedirectRegister}
+                    className="w-full rounded-2xl btn-brand py-3 text-xs font-bold text-white hover:shadow-xs transition cursor-pointer"
+                  >
+                    Create Free Account & Choose Plan
+                  </button>
+                  <a
+                    href="/login"
+                    className="block w-full rounded-2xl border border-slate-200 bg-white py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Sign In to Existing Account
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       </main>
 
       <PublicFooter />

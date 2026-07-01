@@ -1,35 +1,115 @@
 @import "tailwindcss";
 
 :root {
-  --background: #02040f;
-  --foreground: #f8fafc;
-  --surface: #0b1220;
-  --surface-strong: #111b36;
-  --surface-soft: #08101c;
-  --brand: #4f6ef7;
-  --brand-soft: #7f9bff;
-  --accent: #22c55e;
-  --border: rgba(255, 255, 255, 0.12);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020814;
-    --foreground: #edf2ff;
-  }
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-strong: #f1f5f9;
+  --surface-soft: #f8fafc;
+  --brand: #6366f1;
+  --brand-soft: #818cf8;
+  --accent: #10b981;
+  --border: rgba(15, 23, 42, 0.08);
 }
 
 body {
-  background: var(--background);
+  background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.07), transparent 30%),
+              radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.05), transparent 25%),
+              var(--background);
+  background-size: 300% 300%;
+  animation: background-pan 35s ease infinite;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+* {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  transition: all 0.25s ease;
+}
+
+button:hover,
+a:hover,
+input:hover,
+textarea:hover,
+select:hover {
+  transform: translateY(-1px);
+}
+
+article:hover,
+.rounded-2xl:hover,
+.rounded-xl:hover,
+.rounded-lg:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+}
+
+.btn-brand {
+  background-color: var(--brand);
+  color: white;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+}
+
+.btn-brand:hover {
+  background-color: var(--brand-soft);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
+}
+
+.ui-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  transform: translateZ(0);
+}
+
+.ui-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+.ui-btn {
+  border-radius: 999px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.ui-btn:hover {
+  transform: translateY(-1px);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+}
+
+@keyframes background-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 .bg-surface { background-color: var(--surface); }

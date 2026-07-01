@@ -27,6 +27,8 @@ const geoScoreRoutes = require('./routes/geo-score');
 const freeAuditRoutes = require('./routes/free-audit');
 const recommendationRoutes = require('./routes/recommendations');
 const commandCenterRoutes = require('./routes/command-center');
+const blogRoutes = require('./routes/blog');
+const peecDashboardRoutes = require('./routes/peec-dashboard');
 app.use('/api/websites/:siteId/keywords', keywordRoutes);
 app.use('/api/websites', websiteRoutes);
 app.use('/api/admin', adminRoutes);
@@ -39,6 +41,8 @@ app.use('/api/free-audit', freeAuditRoutes);
 app.use('/api/billing', billingRoutes.router);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/command-center', commandCenterRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/peec-dashboard', peecDashboardRoutes);
 // Routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);

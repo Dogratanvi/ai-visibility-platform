@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
+import SupportChatWidget from '@/components/SupportChatWidget';
 
 export const metadata: Metadata = {
   title: 'AI Visibility - Search Optimization',
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <SupportChatWidget />
+        </Providers>
       </body>
     </html>
   );

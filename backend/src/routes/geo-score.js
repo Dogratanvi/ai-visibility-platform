@@ -337,8 +337,17 @@ const checkCrawlerRequest = async (url, robotsTxt, crawler) => {
 
   const result = await fetchUrl(url, 0, crawler.name);
   const textLength = stripHtml(result.body).length;
+
+  const titleMatch = result.body.match(/<title>([\s\S]*?)<\/title>/i);
+  const title = titleMatch ? titleMatch[1].toLowerCase() : '';
+  const isBlockTitle = title.includes('access denied')
+    || title.includes('attention required')
+    || title.includes('security check')
+    || title.includes('captcha')
+    || title.includes('just a moment');
+
   const blockedByResponse = result.statusCode >= 400
-    || /access denied|forbidden|captcha|cloudflare|bot detection|blocked/i.test(result.body)
+    || isBlockTitle
     || textLength < 80;
 
   return { ...crawler, allowed: result.ok && !blockedByResponse };
@@ -347,13 +356,45 @@ const checkCrawlerRequest = async (url, robotsTxt, crawler) => {
 const getHostingInfo = async (hostname) => {
   try {
     const records = await dns.resolve4(hostname);
+    const ip = records[0];
+    if (!ip) throw new Error('No IP found');
+
+    const geo = await new Promise((resolve) => {
+      const req = http.get(`http://ip-api.com/json/${ip}`, { timeout: 4000 }, (res) => {
+        let data = '';
+        res.on('data', (chunk) => data += chunk);
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch {
+            resolve(null);
+          }
+        });
+      });
+      req.on('error', () => resolve(null));
+      req.on('timeout', () => {
+        req.destroy();
+        resolve(null);
+      });
+    });
+
+    if (geo && geo.status === 'success') {
+      return {
+        ip,
+        country: geo.country || 'Unknown',
+        region: geo.regionName && geo.city ? `${geo.regionName}, ${geo.city}` : geo.regionName || geo.city || 'Unknown',
+        provider: geo.isp || geo.org || 'Unknown',
+      };
+    }
+
     return {
-      ip: records[0],
+      ip,
       country: 'Unknown',
       region: 'Unknown',
       provider: 'Resolved DNS',
     };
   } catch (err) {
+    console.error('getHostingInfo error:', err.message);
     return {
       ip: 'N/A',
       country: 'Unknown',

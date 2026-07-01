@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { ReactNode } from 'react';
 
@@ -6,14 +6,19 @@ export default function AdminModal({ open, onClose, children }: { open: boolean;
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-6">
-      <div className="fixed inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-5xl rounded-2xl bg-[#0f1117] border border-[#2a2d3a] shadow-lg overflow-auto max-h-[80vh]">
-        <div className="flex items-center justify-between p-4 border-b border-[#2a2d3a]">
-          <h3 className="text-lg font-semibold text-white">Panel</h3>
-          <button onClick={onClose} className="text-sm text-slate-300 bg-slate-800 px-3 py-1 rounded">Close</button>
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-6 mt-10">
+      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-5xl rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-auto max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-150 bg-slate-50/50">
+          <h3 className="text-sm font-extrabold text-slate-900 tracking-wide">System Control</h3>
+          <button
+            onClick={onClose}
+            className="text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-xl transition cursor-pointer"
+          >
+            Close
+          </button>
         </div>
-        <div className="p-4">
+        <div className="p-6">
           {children}
         </div>
       </div>

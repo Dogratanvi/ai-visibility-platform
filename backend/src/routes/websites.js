@@ -63,9 +63,18 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Website not found' });
     }
 
-    await prisma.website.delete({ where: { id: req.params.id } });
+    // Cascading delete in a transaction
+    await prisma.$transaction([
+      prisma.keyword.deleteMany({ where: { websiteId: req.params.id } }),
+      prisma.schedule.deleteMany({ where: { websiteId: req.params.id } }),
+      prisma.dailyScan.deleteMany({ where: { websiteId: req.params.id } }),
+      prisma.customPrompt.deleteMany({ where: { websiteId: req.params.id } }),
+      prisma.website.delete({ where: { id: req.params.id } }),
+    ]);
+
     res.json({ success: true });
   } catch (err) {
+    console.error('Delete website failed:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });

@@ -79,83 +79,83 @@ function TestCheckoutContent() {
   };
 
   return (
-    <main className="min-h-screen bg-[#060a13] px-5 py-10 text-white">
-      <div className="mx-auto grid max-w-4xl overflow-hidden rounded-lg border border-white/10 bg-[#0b1220] lg:grid-cols-[0.85fr_1.15fr]">
-        <section className="border-b border-white/10 bg-[#111b36] p-8 lg:border-b-0 lg:border-r">
-          <Link href="/pricing" className="text-sm text-white/60 hover:text-white">← Back to pricing</Link>
-          <p className="mt-10 text-xs font-semibold uppercase tracking-[0.18em] text-[#91a2ff]">Order summary</p>
+    <main className="min-h-screen bg-[#f8fafc] px-5 py-10 text-slate-800 font-sans">
+      <div className="mx-auto grid max-w-4xl overflow-hidden rounded-3xl border border-slate-200 bg-white lg:grid-cols-[0.85fr_1.15fr] shadow-sm">
+        <section className="border-b border-slate-200 bg-slate-50 p-8 lg:border-b-0 lg:border-r lg:border-slate-200">
+          <Link href="/pricing" className="text-sm text-slate-500 font-bold hover:text-slate-800">← Back to pricing</Link>
+          <p className="mt-10 text-xs font-bold uppercase tracking-[0.18em] text-indigo-650">Order summary</p>
           {plan ? (
             <>
-              <h1 className="mt-3 text-3xl font-semibold">{plan.name}</h1>
-              <p className="mt-3 text-sm text-white/60">AI visibility tracking and growth recommendations.</p>
-              <div className="mt-10 flex items-end gap-2 border-t border-white/10 pt-8">
-                <span className="text-4xl font-semibold">${billingPeriod === 'annual' ? plan.displayPrice : plan.monthlyPrice}</span>
-                <span className="pb-1 text-white/50">{billingPeriod === 'annual' ? 'per year' : 'per month'}</span>
+              <h1 className="mt-3 text-3xl font-extrabold text-slate-900">{plan.name}</h1>
+              <p className="mt-3 text-sm text-slate-500">AI visibility tracking and growth recommendations.</p>
+              <div className="mt-10 flex items-end gap-2 border-t border-slate-200 pt-8">
+                <span className="text-4xl font-extrabold text-slate-900">${billingPeriod === 'annual' ? plan.displayPrice : plan.monthlyPrice}</span>
+                <span className="pb-1 text-slate-400 font-bold">{billingPeriod === 'annual' ? 'per year' : 'per month'}</span>
               </div>
               {billingPeriod === 'annual' && (
-                <p className="mt-3 text-sm text-white/55">${plan.annualMonthlyPrice}/mo billed annually</p>
+                <p className="mt-3 text-sm text-slate-500">${plan.annualMonthlyPrice}/mo billed annually</p>
               )}
             </>
           ) : (
-            <p className="mt-4 text-sm text-white/55">Loading plan...</p>
+            <p className="mt-4 text-sm text-slate-400">Loading plan...</p>
           )}
         </section>
 
         <section className="p-8">
-          <div className="rounded-md border border-amber-300/30 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 font-semibold shadow-xs">
             Test mode only. Do not enter a real card. Use <strong>4242 4242 4242 4242</strong>.
           </div>
-          <h2 className="mt-7 text-xl font-semibold">Test payment details</h2>
+          <h2 className="mt-7 text-xl font-extrabold text-slate-900">Test payment details</h2>
 
           <form onSubmit={submitPayment} className="mt-6 space-y-5">
-            <label className="block text-sm text-white/70">
+            <label className="block text-xs font-bold text-slate-600 mb-1.5">
               Cardholder name
               <input
                 value={cardholder}
                 onChange={(event) => setCardholder(event.target.value)}
                 required
-                className="mt-2 w-full rounded-md border border-white/12 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#6f85ff]"
+                className="mt-1.5 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500 text-sm font-semibold transition"
               />
             </label>
-            <label className="block text-sm text-white/70">
+            <label className="block text-xs font-bold text-slate-600 mb-1.5">
               Card number
               <input
                 value={cardNumber}
                 onChange={(event) => setCardNumber(event.target.value)}
                 inputMode="numeric"
                 required
-                className="mt-2 w-full rounded-md border border-white/12 bg-white/5 px-4 py-3 font-mono text-white outline-none focus:border-[#6f85ff]"
+                className="mt-1.5 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-slate-800 outline-none focus:bg-white focus:border-indigo-500 text-sm font-semibold transition"
               />
             </label>
             <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm text-white/70">
+              <label className="block text-xs font-bold text-slate-600 mb-1.5">
                 Expiry
                 <input
                   value={expiry}
                   onChange={(event) => setExpiry(event.target.value)}
                   placeholder="MM/YY"
                   required
-                  className="mt-2 w-full rounded-md border border-white/12 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#6f85ff]"
+                  className="mt-1.5 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500 text-sm font-semibold transition"
                 />
               </label>
-              <label className="block text-sm text-white/70">
+              <label className="block text-xs font-bold text-slate-600 mb-1.5">
                 CVC
                 <input
                   value={cvc}
                   onChange={(event) => setCvc(event.target.value)}
                   inputMode="numeric"
                   required
-                  className="mt-2 w-full rounded-md border border-white/12 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#6f85ff]"
+                  className="mt-1.5 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500 text-sm font-semibold transition"
                 />
               </label>
             </div>
 
-            {error && <p className="rounded-md border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">{error}</p>}
+            {error && <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-500 font-bold">{error}</p>}
 
             <button
               type="submit"
               disabled={!plan || loading}
-              className="w-full rounded-md bg-[#4f6ef7] px-5 py-3 font-semibold text-white hover:bg-[#617cf8] disabled:opacity-50"
+              className="w-full rounded-full btn-brand px-5 py-3 font-bold text-white shadow-md hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Activating plan...' : plan ? `Pay $${billingPeriod === 'annual' ? plan.displayPrice : plan.monthlyPrice} (test)` : 'Loading...'}
             </button>
@@ -168,7 +168,7 @@ function TestCheckoutContent() {
 
 export default function TestCheckoutPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#060a13]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f8fafc]" />}>
       <TestCheckoutContent />
     </Suspense>
   );
